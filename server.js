@@ -11,7 +11,7 @@ bot.on('message', msg => {
     msg.reply('Pong!');
   }
 });
-
+//busca giphy
 bot.on('message', (msg) => {
   if(msg.content.indexOf("-gif")>-1){
     word = msg.content.toString().replace(/-gif /,'');
@@ -33,6 +33,7 @@ var searchGiphy = function(id,url){
 var sendGiphy = function(id,url){
   id.send(url[(Math.floor((Math.random() * url.length) + 1))])
 }
+//busca videos no youtube
 bot.on('message', (msg) => {
   if(msg.content.indexOf("-youtube")>-1){
     word = msg.content.toString().replace(/-youtube /,'');
@@ -54,23 +55,28 @@ var searchVideos = function(id,search){
 var sendVideos = function(id,videos){
     id.send("https://www.youtube.com/"+videos);
 }
+
+//função que varre as fotos no site e traz para o discord
+bot.on('message',(msg)=>{
+  if(msg.content.toString().indexOf('-rule34')>-1){
+    var search = msg.content.toString().split(' ');
+    var url = 'https://rule34.paheal.net/post/list/'+search[1].toUpperCase()+"/1";
+    searchRule34(url,msg.channel);
+  }
+  });
+
 var searchRule34 = function(url, id){
   return request(url,(err,resp,body)=>{
   console.log(body);
-   var linkImage= body.toString().match(/https:\/\/rule34.xxx\/thumbnails\/\d{3,4}\/thumbnail_\w{20,50}.\w{3,4}/gi);
+   var linkImage= body.toString().match(/http:\/\/\w{4,7}.paheal.net\/_images\/\w{30,40}\/\d{6,8}/gi);
    console.log(linkImage);
    var image = linkImage[Math.floor((Math.random() * linkImage.length) + 1)]
    if(image)
     id.send(image);
    });
 }
-bot.on('message',(msg)=>{
-  if(msg.content.toString().indexOf('-rule34')>-1){
-    var search = msg.content.toString().split(' ');
-    var url = 'https://rule34.xxx/index.php?page=post&s=list&tags='+search[1];
-    searchRule34(url,msg.channel);
-  }
-  });
+
+//função que varre as fotos no site e traz para o discord
 bot.on('message', (msg) => {
   if(msg.content.indexOf("-search")>-1){
     word = msg.content.toString().split(' ');
@@ -93,6 +99,7 @@ var sendImages = function(id,link){
     var image = link[Math.floor((Math.random() * link.length) + 1)]
     id.send("https://"+image);
 }
+//função que conecta no voice channel
 bot.on('message', message => {
 
   if (message.content === '-join') {
@@ -102,18 +109,21 @@ bot.on('message', message => {
     }).catch(console.error);
 }
 });
+//função que faz o bot sair do voice channel
 bot.on('message',message=>{
   if (message.content === '-leave'){
     if (message.guild.voiceConnection)
     message.guild.voiceConnection.disconnect();
   }
 });
+//função que toca musica do URL do youtube
 bot.on('message',message=>{
   if (message.content.toString().indexOf('-play')>-1){
    url = message.content.toString().split(' ');
    playVideo(url[1],message);
   }
 });
+
 var playVideo = function(url,message){
 const ytdl = require('ytdl-core');
 const streamOptions = { seek: 0, volume: 0.2 };
@@ -124,4 +134,18 @@ const streamOptions = { seek: 0, volume: 0.2 };
   })
   .catch(console.error);
 }
-bot.login('NDI3NTU5MTIwNDY4NDQzMTM2.DZmWIg.i-Nu2PJ6NocpxXJH2vjpB9v0_2A');
+
+bot.on('voiceStateUpdate', (oldMember, newMember) => {
+  if (newMember.displayName === "Dollynho") return;
+  let guild = newMember.guild;
+  let channel = guild.channel;
+  
+  if (oldMember.voiceChannel === undefined && newMember.voiceChannel) {
+    memberJoinedChannel(guild, newMember);
+  }
+  else if (oldMember.voiceChannel && newMember.voiceChannel === undefined) {
+    memberLeftChannel(guild, oldMember);
+  }
+});
+
+bot.login('NDI3NjMzMjQxMzExMjgxMTUy.DZnY5A.ou_GwDi-QuUU29QlBZM-cAL-8L4');
