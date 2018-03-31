@@ -1,6 +1,9 @@
 const discord = require('discord.js');
-const request = require('request');
 const bot = new discord.Client();
+const commands = require('./commands.js');
+
+
+bot.change_presence(game=discord.Game(name='-help'));
 
 bot.on('ready', () => {
   console.log(`Logged in as ${bot.user.tag}!`);
@@ -19,20 +22,9 @@ bot.on('message', (msg) => {
     search = 'https://giphy.com/search/'+word;
     console.log(search);
     if(search)
-    searchGiphy(msg.channel,search);
+    commands.searchGiphy(msg.channel,search);
   }
 });
-const searchGiphy = function(id,url){
-  return request(url,(err,resp,body)=>{
-    giphys = body.toString().match(/https:\/\/gph.is\/\w{0,20}/gi);
-    console.log(giphys);
-    if(giphys)
-    sendGiphy(id,giphys);
-  });
-}
-const sendGiphy = function(id,url){
-  id.send(url[(Math.floor((Math.random() * url.length) + 1))])
-}
 //busca videos no youtube
 bot.on('message', (msg) => {
   if(msg.content.indexOf("-youtube")>-1){
@@ -40,23 +32,9 @@ bot.on('message', (msg) => {
     console.log(word);
     search = 'https://www.youtube.com/results?search_query='+word;
     console.log(search);
-    searchVideos(msg.channel,search);
+    commands.searchVideos(msg.channel,search);
   }
 });
-const searchVideos = function(id,search){
-  return request(search,(err,resp,body)=>{
-    const regEXP = /watch\?v=\w{7,20}/i;
-    videos = body.toString().match(regEXP);
-    if(videos){
-    sendVideos(id,videos);
-    }else{
-      id.send("Não foi Possivel achar um video");
-    } 
-  })
-}
-const sendVideos = function(id,videos){
-    id.send("https://www.youtube.com/"+videos);
-}
 
 //função que varre as fotos no site e traz para o discord
 bot.on('message',(msg)=>{
@@ -64,23 +42,9 @@ bot.on('message',(msg)=>{
     const search = msg.content.toString().replace(/-rule34 /,'');
     console.log(search);
     const url = 'https://rule34.paheal.net/post/list/'+search.toUpperCase()+"/1";
-    searchRule34(url,msg.channel);
+    commands.searchRule34(url,msg.channel);
   }
   });
-
-const searchRule34 = function(url, id){
-  return request(url,(err,resp,body)=>{
-  console.log(body);
-   var linkImage= body.toString().match(/http:\/\/\w{4,7}.paheal.net\/_images\/\w{30,40}\/\d{6,8}/gi);
-   console.log(linkImage);
-   if(linkImage){
-    const image = linkImage[Math.floor((Math.random() * linkImage.length) + 1)]
-    id.send(image);
-   }else{
-    id.send("Não foi possivel achar uma foto");
-   }
-   });
-}
 
 //função que varre as fotos no site e traz para o discord
 bot.on('message', (msg) => {
@@ -89,22 +53,9 @@ bot.on('message', (msg) => {
     console.log(word);
     search = 'https://www.flickr.com/search/?text='+word[1];
     console.log(search);
-    searchImages(msg.channel,search);
+    commands.searchImages(msg.channel,search);
   }
 });
-const searchImages = function(id,search){
-  return request(search,(err,resp,body)=>{
-    const regEXP = /c1.staticflickr.com\/\d\/\d{4}\/\d{10}_\w{10}_?\w?.jpg/gi;
-    imagens = body.toString().match(regEXP);
-    console.log(imagens);
-    if(imagens)
-    sendImages(id,imagens); 
-  })
-}
-const sendImages = function(id,link){
-    const image = link[Math.floor((Math.random() * link.length) + 1)]
-    id.send("https://"+image);
-}
 //função que conecta no voice channel
 bot.on('message', message => {
 
@@ -127,24 +78,9 @@ bot.on('message',message=>{
 bot.on('message',message=>{
   if (message.content.toString().indexOf('-play')>-1){
    url = message.content.toString().split(' ');
-   playVideo(url[1],message);
+   commands.playVideo(url[1],message);
   }
 });
-
-const playVideo = function(url,message){
-const ytdl = require('ytdl-core');
-const streamOptions = { seek: 0, volume: 0.2 };
-  if(message.member.voiceChannel){
-  message.member.voiceChannel.join()
-  .then(connection => {
-    const stream = ytdl(url, { filter : 'audioonly' });
-    const dispatcher = connection.playStream(stream, streamOptions);
-  })
-  .catch(console.error);
-  }else{
-  message.channel.send("Entre em um canal de voz para tocar uma musica");
-  }
-}
 
 
 bot.login('NDI3NjMzMjQxMzExMjgxMTUy.DZnY5A.ou_GwDi-QuUU29QlBZM-cAL-8L4');
