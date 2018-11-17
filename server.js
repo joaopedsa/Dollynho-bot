@@ -2,9 +2,6 @@ const discord = require('discord.js');
 const bot = new discord.Client();
 const commands = require('./commands.js');
 
-
-bot.change_presence(game=discord.Game(name='-help'));
-
 bot.on('ready', () => {
   console.log(`Logged in as ${bot.user.tag}!`);
 });
